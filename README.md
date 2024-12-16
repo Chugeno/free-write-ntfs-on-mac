@@ -10,13 +10,15 @@ This repository contains a tutorial on how to install NTFS-3G and automate the m
 
 1. **Install MacPorts**: Visit [MacPorts](https://www.macports.org/) and follow the installation instructions.
 2. **Install NTFS-3G**: Run the following command in the terminal:
-   '''bash
+   ```
+   bash
    sudo port install ntfs-3g
-   '''
+   ```
 3. **Mount the NTFS Disk**: Use the following command to mount the disk:
-   '''bash
+   ```
+   bash
    sudo /opt/local/bin/ntfs-3g -o auto_xattr /dev/diskXsY /Volumes/NAME -olocal -oallow_other
-   '''
+   ```
    Replace `diskXsY` with the correct identifier for your disk and `NAME` with the desired mount point.
 4. **Automate Mounting**: Create an Automator application using the provided script in the tutorial.
 
