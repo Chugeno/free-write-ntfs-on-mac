@@ -31,7 +31,7 @@ Before mounting an NTFS disk in write mode, follow these steps:
 
 3. Find out the UUID of the disk with the following command:
    ```bash
-   diskutil info /dev/diskXsY ``` grep "Volume UUID"
+   diskutil info /dev/diskXsY | grep "Volume UUID"
    ```
    Replace `diskXsY` with the correct identifier for your disk.
 

@@ -12,9 +12,9 @@ Este tutorial detalla cómo instalar NTFS-3G en macOS utilizando MacPorts para h
 
 Una vez que tengas MacPorts instalado, abre una terminal y ejecuta el siguiente comando:
 
-'''bash
+```bash
 sudo port install ntfs-3g
-'''
+```
 
 Este comando instalará NTFS-3G junto con todas sus dependencias.
 
@@ -24,30 +24,30 @@ Antes de montar un disco NTFS en modo escritura, sigue estos pasos:
 
 1. Conecta tu disco NTFS al Mac.
 2. Verifica el identificador del disco con:
-   '''bash
+   ```bash
    diskutil list
-   '''
+   ```
    Busca en la lista tu disco NTFS (por ejemplo, /dev/disk4s1).
 
 3. Averigua el UUID del disco con el siguiente comando:
-   '''bash
-   diskutil info /dev/diskXsY ''' grep "Volume UUID"
-   '''
+   ```bash
+   diskutil info /dev/diskXsY | grep "Volume UUID"
+   ```
    Reemplaza `diskXsY` con el identificador correcto de tu disco.
 
 4. Desmonta el disco con:
-   '''bash
+   ```bash
    sudo diskutil unmount /dev/diskXsY
-   '''
+   ```
    Reemplaza `diskXsY` con el identificador correcto de tu disco.
 
 ## Paso 4: Montar el disco NTFS en modo escritura
 
 Para montar el disco con soporte de escritura, usa el siguiente comando:
 
-'''bash
-sudo /opt/local/bin/ntfs-3g -o auto_xattr /dev/diskXsY /Volumes/NOMBRE -olocal -oallow_other
-'''
+```bash
+sudo /opt/local/bin/ntfs-3g -o auto_xattr /dev/diskXsY /Volumes/NAME -olocal -oallow_other
+```
 
 ### Explicación del comando:
 
@@ -63,28 +63,28 @@ sudo /opt/local/bin/ntfs-3g -o auto_xattr /dev/diskXsY /Volumes/NOMBRE -olocal -
 
 Para facilitar el montaje de discos NTFS, puedes crear una aplicación con Automator que ejecute un script. Utiliza el siguiente script en Automator:
 
-'''bash
+```bash
 #!/bin/bash
 
-# UUID único del disco
-DISK_UUID="6256AD4A-B8C3-44AA-A382-22F5EAAE7896"  # Reemplázalo con el UUID de tu disco
-MOUNT_POINT="/Volumes/Elements"  # Cambia por el nombre de tu punto de montaje
+# Unique UUID of the disk
+DISK_UUID="6256AD4A-B8C3-44AA-A382-22F5EAAE7896"  # Replace with your disk's UUID
+MOUNT_POINT="/Volumes/Elements"  # Change to your desired mount point
 
-# Función para mostrar notificaciones
+# Function to show notifications
 notify() {
     osascript -e "display notification \"$1\" with title \"Auto Mount NTFS\""
 }
 
-# Función para montar el disco
+# Function to mount the disk
 mount_disk() {
-    notify "Disco con UUID $DISK_UUID detectado. Procediendo a desmontar y montar con NTFS-3G..."
-    DISK_DEVICE=$(diskutil info "$DISK_UUID" ''' grep "Device Node" ''' awk '{print $3}')
+    notify "Disk with UUID $DISK_UUID detected. Proceeding to unmount and mount with NTFS-3G..."
+    DISK_DEVICE=$(diskutil info "$DISK_UUID" ``` grep "Device Node" ``` awk '{print $3}')
     sudo diskutil unmount $DISK_DEVICE
     sudo /opt/local/bin/ntfs-3g -o auto_xattr $DISK_DEVICE $MOUNT_POINT -olocal -oallow_other
-    notify "Disco montado correctamente en $MOUNT_POINT"
+    notify "Disk successfully mounted at $MOUNT_POINT"
 }
 
-# Loop para observar constantemente las conexiones de discos
+# Loop to constantly observe disk connections
 while true; do
     if diskutil info "$DISK_UUID" &> /dev/null; then
         mount_disk
@@ -94,7 +94,7 @@ while true; do
     fi
     sleep 5
 done
-'''
+```
 
 ### Nota adicional:
 
