@@ -12,9 +12,9 @@ This tutorial details how to install NTFS-3G on macOS using MacPorts to enable w
 
 Once you have MacPorts installed, open a terminal and run the following command:
 
-'''bash
+```bash
 sudo port install ntfs-3g
-'''
+```
 
 This command will install NTFS-3G along with all its dependencies.
 
@@ -24,30 +24,30 @@ Before mounting an NTFS disk in write mode, follow these steps:
 
 1. Connect your NTFS disk to the Mac.
 2. Check the disk identifier with:
-   '''bash
+   ```bash
    diskutil list
-   '''
+   ```
    Look for your NTFS disk in the list (e.g., /dev/disk4s1).
 
 3. Find out the UUID of the disk with the following command:
-   '''bash
-   diskutil info /dev/diskXsY ''' grep "Volume UUID"
-   '''
+   ```bash
+   diskutil info /dev/diskXsY ``` grep "Volume UUID"
+   ```
    Replace `diskXsY` with the correct identifier for your disk.
 
 4. Unmount the disk with:
-   '''bash
+   ```bash
    sudo diskutil unmount /dev/diskXsY
-   '''
+   ```
    Replace `diskXsY` with the correct identifier for your disk.
 
 ## Step 4: Mount the NTFS Disk in Write Mode
 
 To mount the disk with write support, use the following command:
 
-'''bash
+```bash
 sudo /opt/local/bin/ntfs-3g -o auto_xattr /dev/diskXsY /Volumes/NAME -olocal -oallow_other
-'''
+```
 
 ### Explanation of the Command:
 
@@ -63,7 +63,7 @@ sudo /opt/local/bin/ntfs-3g -o auto_xattr /dev/diskXsY /Volumes/NAME -olocal -oa
 
 To facilitate the mounting of NTFS disks, you can create an application with Automator that runs a script. Use the following script in Automator:
 
-'''bash
+```bash
 #!/bin/bash
 
 # Unique UUID of the disk
@@ -78,7 +78,7 @@ notify() {
 # Function to mount the disk
 mount_disk() {
     notify "Disk with UUID $DISK_UUID detected. Proceeding to unmount and mount with NTFS-3G..."
-    DISK_DEVICE=$(diskutil info "$DISK_UUID" ''' grep "Device Node" ''' awk '{print $3}')
+    DISK_DEVICE=$(diskutil info "$DISK_UUID" ``` grep "Device Node" ``` awk '{print $3}')
     sudo diskutil unmount $DISK_DEVICE
     sudo /opt/local/bin/ntfs-3g -o auto_xattr $DISK_DEVICE $MOUNT_POINT -olocal -oallow_other
     notify "Disk successfully mounted at $MOUNT_POINT"
@@ -94,7 +94,7 @@ while true; do
     fi
     sleep 5
 done
-'''
+```
 
 ### Additional Note:
 
