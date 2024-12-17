@@ -1,4 +1,4 @@
-# README - VERSIÓN 2 - Montaje Automático de Discos NTFS en macOS 🚀
+# VERSIÓN 2 - Montaje Automático de Discos NTFS en macOS 🚀
 
 ¡Bienvenido a la versión 2 de este script! 🎉 Esta actualización automatiza el proceso de habilitar la escritura en discos NTFS en macOS, permitiendo que cualquier disco NTFS se monte automáticamente al conectarlo.
 

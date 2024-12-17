@@ -1,4 +1,4 @@
-# README - VERSION 2 - Automatic Mounting of NTFS Disks on macOS 🚀
+# VERSION 2 - Automatic Mounting of NTFS Disks on macOS 🚀
 
 Welcome to version 2 of this script! 🎉 This update automates the process of enabling writing to NTFS disks on macOS, allowing any NTFS disk to be automatically mounted when connected.
 
