@@ -6,9 +6,9 @@ Welcome to version 2 of this script! 🎉 This update automates the process of e
 
 1. **Install MacPorts**: Visit [MacPorts](https://www.macports.org/) and follow the installation instructions.
 2. **Install NTFS-3G**: Open a terminal and run:
-   @bash
-   sudo port install ntfs-3g
-   @
+```bash
+sudo port install ntfs-3g
+
 3. **Configure Sudoers**: Allow the script to run without prompting for a password.
 4. **Configure Automator**: Create a folder action that runs the `auto_mount_ntfs.sh` script.
 
