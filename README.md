@@ -8,7 +8,7 @@ Welcome to version 2 of this script! 🎉 This update automates the process of e
 2. **Install NTFS-3G**: Open a terminal and run:
 ```bash
 sudo port install ntfs-3g
-
+```
 3. **Configure Sudoers**: Allow the script to run without prompting for a password.
 4. **Configure Automator**: Create a folder action that runs the `auto_mount_ntfs.sh` script.
 
