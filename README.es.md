@@ -1,32 +1,24 @@
-# Escritura Libre en NTFS en Mac 🚀
+# README - VERSIÓN 2 - Montaje Automático de Discos NTFS en macOS 🚀
 
-Este proyecto tiene como objetivo habilitar la escritura en discos NTFS en macOS utilizando NTFS-3G y MacPorts.
+¡Bienvenido a la versión 2 de este script! 🎉 Esta actualización automatiza el proceso de habilitar la escritura en discos NTFS en macOS, permitiendo que cualquier disco NTFS se monte automáticamente al conectarlo.
 
-## Descripción
-
-Este repositorio contiene un tutorial sobre cómo instalar NTFS-3G y automatizar el montaje de discos NTFS en macOS.
-
-### Pasos Rápidos
+## Pasos Rápidos para Comenzar
 
 1. **Instalar MacPorts**: Visita [MacPorts](https://www.macports.org/) y sigue las instrucciones de instalación.
-2. **Instalar NTFS-3G**: Ejecuta el siguiente comando en la terminal:
+2. **Instalar NTFS-3G**: Abre una terminal y ejecuta:
    ```bash
    sudo port install ntfs-3g
    ```
-3. **Montar el Disco NTFS**: Usa el siguiente comando para montar el disco:
-   ```bash
-   sudo /opt/local/bin/ntfs-3g -o auto_xattr /dev/diskXsY /Volumes/NOMBRE -olocal -oallow_other
-   ```
-   Reemplaza `diskXsY` con el identificador correcto de tu disco y `NOMBRE` con el punto de montaje deseado.
-4. **Automatizar el Montaje**: Crea una aplicación de Automator utilizando el script proporcionado en el tutorial.
+3. **Configurar Sudoers**: Permite que el script se ejecute sin solicitar contraseña.
+4. **Configurar Automator**: Crea una acción de carpeta que ejecute el script `auto_mount_ntfs.sh`.
 
-### Tutorial Completo
+## Tutorial Completo
 
-Para instrucciones detalladas, consulta el tutorial completo [aquí](tutorial.es.md). Este tutorial también incluye un script para automatizar el montaje de tu disco NTFS.
+Para instrucciones detalladas, consulta el tutorial completo [aquí](./tutorial.es.md).
 
-### Apoya el Proyecto
+## ¡Colabora! ☕
 
-Si deseas apoyar este pequeño proyecto, puedes hacerlo aquí:
+Si este proyecto te ha sido útil, considera apoyarlo:
 - [Buy Me a Coffee](http://buymeacoffee.com/chugeno)
 - [Mercado Pago](http://link.mercadopago.com.ar/eugenioazurmendi)
 
@@ -34,4 +26,4 @@ Si deseas apoyar este pequeño proyecto, puedes hacerlo aquí:
 
 To read the README in English, click [here](README.md).
 
-¡Gracias por revisar este proyecto! Si tienes alguna pregunta o comentario, no dudes en comunicarte. 😊
+¡Gracias por tu apoyo y disfruta de la escritura en tus discos NTFS! 😊

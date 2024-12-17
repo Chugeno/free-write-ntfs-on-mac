@@ -1,37 +1,29 @@
-# Free Write NTFS on Mac 🚀
+# README - VERSION 2 - Automatic Mounting of NTFS Disks on macOS 🚀
 
-This project aims to enable writing to NTFS disks on macOS using NTFS-3G and MacPorts.
+Welcome to version 2 of this script! 🎉 This update automates the process of enabling writing to NTFS disks on macOS, allowing any NTFS disk to be automatically mounted when connected.
 
-## Overview
-
-This repository contains a tutorial on how to install NTFS-3G and automate the mounting of NTFS disks on macOS. 
-
-### Quick Steps
+## Quick Start Steps
 
 1. **Install MacPorts**: Visit [MacPorts](https://www.macports.org/) and follow the installation instructions.
-2. **Install NTFS-3G**: Run the following command in the terminal:
-   ```bash
+2. **Install NTFS-3G**: Open a terminal and run:
+   @bash
    sudo port install ntfs-3g
-   ```
-3. **Mount the NTFS Disk**: Use the following command to mount the disk:
-   ```bash
-   sudo /opt/local/bin/ntfs-3g -o auto_xattr /dev/diskXsY /Volumes/NAME -olocal -oallow_other
-   ```
-   Replace `diskXsY` with the correct identifier for your disk and `NAME` with the desired mount point.
-4. **Automate Mounting**: Create an Automator application using the provided script in the tutorial.
+   @
+3. **Configure Sudoers**: Allow the script to run without prompting for a password.
+4. **Configure Automator**: Create a folder action that runs the `auto_mount_ntfs.sh` script.
 
-### Full Tutorial
+## Complete Tutorial
 
-For detailed instructions, please refer to the full tutorial [here](tutorial.md). This tutorial also includes a script to automate the mounting of your NTFS disk.
-
-### Support the Project
-
-If you would like to support this small project, you can do so here:
-- [Buy Me a Coffee](http://buymeacoffee.com/chugeno)
-- [Mercado Pago](http://link.mercadopago.com.ar/eugenioazurmendi)
+For detailed instructions, please refer to the complete tutorial [here](./tutorial.md).
 
 ### Spanish Version
 
 Para leer el README en español, haz clic [aquí](README.es.md).
 
-Thank you for checking out this project! If you have any questions or feedback, feel free to reach out. 😊
+## Support the Project! ☕
+
+If this project has been helpful to you, consider supporting it:
+- [Buy Me a Coffee](http://buymeacoffee.com/chugeno)
+- [Mercado Pago](http://link.mercadopago.com.ar/eugenioazurmendi)
+
+Thank you for your support, and enjoy writing to your NTFS disks! 😊

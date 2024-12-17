@@ -1,53 +1,69 @@
-# Tutorial: Cómo instalar y usar NTFS-3G en macOS con MacPorts
+# Tutorial: VERSIÓN 2 - Habilitar Escritura en Discos NTFS en macOS
 
-Este tutorial detalla cómo instalar NTFS-3G en macOS utilizando MacPorts para habilitar la escritura en discos con formato NTFS. También incluye instrucciones sobre cómo montar discos NTFS desde la terminal y cómo automatizar el proceso.
+Este tutorial detalla cómo instalar y configurar NTFS-3G en macOS para habilitar la escritura en discos con formato NTFS. Esta es la versión 2 del script, que automatiza el proceso de montaje de discos NTFS.
 
 ## Paso 1: Instalar MacPorts
 
-1. Visita el sitio oficial de MacPorts: https://www.macports.org/
+1. Visita el sitio oficial de MacPorts: [MacPorts](https://www.macports.org/).
 2. Descarga el instalador correspondiente a tu versión de macOS.
 3. Sigue las instrucciones de instalación en pantalla.
 
 ## Paso 2: Instalar NTFS-3G
 
 Una vez que tengas MacPorts instalado, abre una terminal y ejecuta el siguiente comando:
-
 ```bash
 sudo port install ntfs-3g
 ```
-
 Este comando instalará NTFS-3G junto con todas sus dependencias.
 
-## Paso 3: Identificar y desmontar el disco NTFS
+## Paso 3: Configurar Sudoers
 
-Antes de montar un disco NTFS en modo escritura, sigue estos pasos:
+Para permitir que el script se ejecute sin solicitar una contraseña, necesitas crear o editar el archivo de configuración de sudoers. Sigue estos pasos:
+
+1. Abre la terminal y ejecuta el siguiente comando:
+```bash
+sudo nano /etc/sudoers.d/ntfs
+```
+
+2. Agrega la siguiente línea para permitir que tu usuario ejecute `ntfs-3g` sin necesidad de ingresar la contraseña:
+```bash
+tu_usuario ALL=(ALL) NOPASSWD: /opt/local/bin/ntfs-3g
+```
+
+3. Guarda y cierra el editor (en nano, presiona `Ctrl + X`, luego `Y` y `Enter`).
+
+## Paso 4: Configurar Automator
+
+1. Abre **Automator** en tu Mac.
+2. Selecciona **Nueva Acción de Carpeta**.
+3. Elige la carpeta `/Volumes/` que se encuentra en el disco principal.
+4. Busca **Ejecutar el script Shell** en la biblioteca de acciones y arrástralo al área de trabajo.
+5. Pega el siguiente script en el cuadro de texto del script shell:
+
+   [Descargar el script `auto_mount_ntfs.sh`](./auto_mount_ntfs.sh)
+
+6. Guarda la acción de carpeta con un nombre descriptivo, como "Montaje Automático NTFS".
+
+## Paso 5: Disfrutar de la Escritura en tu Disco NTFS
+
+Ahora puedes disfrutar de la escritura en tu disco NTFS en macOS. Cada vez que conectes un disco NTFS, el script se ejecutará automáticamente y montará el disco con soporte de escritura.
+
+## Extra: Montar un Disco NTFS en Particular
+
+Si deseas montar solo un disco NTFS para escribirlo, puedes usar el siguiente comando:
 
 1. Conecta tu disco NTFS al Mac.
 2. Verifica el identificador del disco con:
-   ```bash
-   diskutil list
-   ```
-   Busca en la lista tu disco NTFS (por ejemplo, /dev/disk4s1).
+```bash
+diskutil list
+```
+Busca en la lista tu disco NTFS (por ejemplo, /dev/disk4s1).
 
-3. Averigua el UUID del disco con el siguiente comando:
-   ```bash
-   diskutil info /dev/diskXsY | grep "Volume UUID"
-   ```
-   Reemplaza `diskXsY` con el identificador correcto de tu disco.
-
-4. Desmonta el disco con:
-   ```bash
-   sudo diskutil unmount /dev/diskXsY
-   ```
-   Reemplaza `diskXsY` con el identificador correcto de tu disco.
-
-## Paso 4: Montar el disco NTFS en modo escritura
-
-Para montar el disco con soporte de escritura, usa el siguiente comando:
-
+3. Monta el disco con el siguiente comando:
 ```bash
 sudo /opt/local/bin/ntfs-3g -o auto_xattr /dev/diskXsY /Volumes/NAME -olocal -oallow_other
 ```
+Reemplaza `diskXsY` con el identificador correcto de tu disco y `NAME` con el nombre del disco.
 
 ### Explicación del comando:
 
@@ -59,47 +75,6 @@ sudo /opt/local/bin/ntfs-3g -o auto_xattr /dev/diskXsY /Volumes/NAME -olocal -oa
 - `-olocal`: Indica que el disco es un sistema de archivos local.
 - `-oallow_other`: Permite que otros usuarios accedan al sistema de archivos.
 
-## Paso 5: Automatizar el Proceso con Automator
+---
 
-Para facilitar el montaje de discos NTFS, puedes crear una aplicación con Automator que ejecute un script. Utiliza el siguiente script en Automator:
-
-```bash
-#!/bin/bash
-
-# Unique UUID of the disk
-DISK_UUID="6256AD4A-B8C3-44AA-A382-22F5EAAE7896"  # Replace with your disk's UUID
-MOUNT_POINT="/Volumes/Elements"  # Change to your desired mount point
-
-# Function to show notifications
-notify() {
-    osascript -e "display notification \"$1\" with title \"Auto Mount NTFS\""
-}
-
-# Function to mount the disk
-mount_disk() {
-    notify "Disk with UUID $DISK_UUID detected. Proceeding to unmount and mount with NTFS-3G..."
-    DISK_DEVICE=$(diskutil info "$DISK_UUID" ``` grep "Device Node" ``` awk '{print $3}')
-    sudo diskutil unmount $DISK_DEVICE
-    sudo /opt/local/bin/ntfs-3g -o auto_xattr $DISK_DEVICE $MOUNT_POINT -olocal -oallow_other
-    notify "Disk successfully mounted at $MOUNT_POINT"
-}
-
-# Loop to constantly observe disk connections
-while true; do
-    if diskutil info "$DISK_UUID" &> /dev/null; then
-        mount_disk
-        while diskutil info "$DISK_UUID" &> /dev/null; do
-            sleep 5
-        done
-    fi
-    sleep 5
-done
-```
-
-### Nota adicional:
-
-Este comando no configura el montaje automático. Si deseas que el disco se monte automáticamente cada vez que lo conectes, puedes configurar el archivo `/etc/fstab`. Pide ayuda si necesitas configurar esto.
-
-Además, puedes agregar la aplicación creada en Automator a los elementos de inicio. Ve a "Preferencias del Sistema", luego a "Usuarios y Grupos", selecciona tu usuario, y en la pestaña "Elementos de inicio de sesión", haz clic en "+" para agregar la aplicación. Aparecerá un engranaje girando en la barra superior (donde está el reloj) que indica que el script está corriendo.
-
-Con estos pasos, podrás habilitar la escritura en tus discos NTFS en macOS. Si tienes dudas o problemas, ¡deja un comentario!
+Si necesitas más ajustes o tienes alguna otra solicitud, ¡házmelo saber! Estoy aquí para ayudarte.
