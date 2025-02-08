@@ -1,20 +1,35 @@
-# VERSIÓN 2 - Montaje Automático de Discos NTFS en macOS 🚀
+# VERSIÓN 2.1 - Instalación Automática y Montaje de Discos NTFS en macOS 🚀
 
-¡Bienvenido a la versión 2 de este script! 🎉 Esta actualización automatiza el proceso de habilitar la escritura en discos NTFS en macOS, permitiendo que cualquier disco NTFS se monte automáticamente al conectarlo.
+¡Bienvenido a la versión 2.1 de este script! 🎉 Esta actualización automatiza el proceso de instalación de lo necesario para habilitar la escritura en discos NTFS en macOS.
 
 ## Pasos Rápidos para Comenzar
 
-1. **Instalar MacPorts**: Visita [MacPorts](https://www.macports.org/) y sigue las instrucciones de instalación.
-2. **Instalar NTFS-3G**: Abre una terminal y ejecuta:
-```bash
-sudo port install ntfs-3g
-```  
-3. **Configurar Sudoers**: Permite que el script se ejecute sin solicitar contraseña.
-4. **Configurar Automator**: Crea una acción de carpeta que ejecute el script `auto_mount_ntfs.sh`.
+1. **Ejecutar el script de instalación:** 
+   ```bash
+   bash install_ntfs.sh
+   ```
+2. **Configurar Sudoers:** Permite que el script se ejecute sin solicitar contraseña. (Reemplaza `tu_usuario` con tu nombre de usuario.)
+   ```bash
+   sudo visudo -f /private/etc/sudoers.d/tu_usuario
+   ```
+   - Agrega la siguiente línea al archivo:
+     ```
+     tu_usuario ALL=(ALL) NOPASSWD: /opt/local/bin/ntfs-3g
+     ```
+   - Guarda y sal del editor.
+
+   - Cambia los permisos del archivo:
+     ```bash
+     sudo chmod 0440 /private/etc/sudoers.d/tu_usuario
+     ```
+
+3. **Edita el script en `Automator`.**
 
 ## Tutorial Completo
 
-Para instrucciones detalladas, consulta el tutorial completo [aquí](./tutorial.es.md).
+Puedes ver instrucciones detalladas [aquí](./instalacion_automatica.es.md) 
+
+O si prefieres una instalación manual, consulta [aquí](./instalacion_manual.es.md).
 
 ## ¡Colabora! ☕
 
