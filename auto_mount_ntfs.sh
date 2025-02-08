@@ -7,7 +7,7 @@ notify() {
 
 # Función para verificar si el disco es NTFS
 is_ntfs() {
-    if diskutil info "$1" | grep -q "Windows_NTFS"; then
+    if diskutil info "$1" | grep "File System Personality:" | grep -q "NTFS"; then
         return 0  # Verdadero
     else
         return 1  # Falso
@@ -17,11 +17,16 @@ is_ntfs() {
 # Función para desmontar y montar el disco
 mount_ntfs() {
     DISK_DEVICE="$1"
-    MOUNT_POINT="/Volumes/$(basename "$DISK_DEVICE")"  # Usa el nombre del dispositivo como punto de montaje
+    
+    # Obtener el nombre del disco
+    DISK_NAME=$(diskutil info "$DISK_DEVICE" | grep "Volume Name" | awk -F ': ' '{print $2}' | xargs)
+    
+    # Construir el punto de montaje
+    MOUNT_POINT="/Volumes/macFUSE $DISK_NAME"  # Concatenar "macFUSE " con el nombre del disco
 
-    # Verificar si el punto de montaje comienza con "macFUSE"
-    if [[ "$MOUNT_POINT" == /Volumes/macFUSE* ]]; then
-        echo "El punto de montaje comienza con 'macFUSE', no se montará."
+    # Verificar si el punto de montaje contiene "macFUSE"
+    if diskutil info "$DISK_DEVICE" | grep -q "macFUSE"; then
+        echo "El punto de montaje es 'macFUSE', no se montará."
         return
     fi
 
@@ -30,7 +35,14 @@ mount_ntfs() {
         echo "Desmontado correctamente: $DISK_DEVICE"
         notify "Desmontado correctamente: $DISK_DEVICE"  # Notificación de desmontaje
         echo "Montando $DISK_DEVICE en $MOUNT_POINT..."
-        if sudo /opt/local/bin/ntfs-3g -o auto_xattr "$DISK_DEVICE" "$MOUNT_POINT" -olocal -oallow_other; then
+        
+        # Solicitar la contraseña del usuario
+        PASSWORD=$(osascript -e 'Tell application "System Events" to display dialog "Introduce tu contraseña para continuar:" default answer "" with hidden answer' -e 'text returned of result')
+        
+        # Usar la contraseña para ejecutar el comando ntfs-3g
+        echo "$PASSWORD" | sudo -S /opt/local/bin/ntfs-3g -o auto_xattr,big_writes,local,allow_other "$DISK_DEVICE" "$MOUNT_POINT"
+        
+        if [ $? -eq 0 ]; then
             echo "Disco montado correctamente en $MOUNT_POINT"
             notify "Disco montado correctamente en $MOUNT_POINT"  # Notificación de montaje
         else
