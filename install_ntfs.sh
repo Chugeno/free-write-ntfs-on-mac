@@ -121,6 +121,19 @@ else
     exit 1
 fi
 
+# --- Paso 5: Refrescar el servicio de Acciones de Carpeta ---
+print_header "Paso 5: Activando el Flujo de Trabajo"
+
+echo "Reiniciando el servicio de Acciones de Carpeta para registrar el nuevo workflow..."
+
+# Asegurarse de que las acciones de carpeta estén habilitadas globalmente
+defaults write com.apple.folderitems FolderActionsEnabled -bool true
+
+# Reiniciar el dispatcher para que cargue la nueva acción
+killall FolderActionsDispatcher &> /dev/null || true
+
+echo -e "${GREEN}El servicio se ha reiniciado. El workflow debería estar activo.${NC}"
+
 # --- Finalización ---
 print_header "Instalación Completada"
 echo -e "${GREEN}El proceso ha finalizado. Por favor, reinicia tu Mac para asegurar que todos los cambios surtan efecto, especialmente los relacionados con el montaje de unidades NTFS.${NC}"
