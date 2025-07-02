@@ -101,18 +101,71 @@ else
     exit 1
 fi
 
-# --- Paso 5: Refrescar el servicio de Acciones de Carpeta ---
-print_header "Paso 5: Activando el Flujo de Trabajo"
+# --- Paso 5: Registrar y Activar el Flujo de Trabajo (Versión Definitiva) ---
+print_header "Paso 5: Adjuntando el workflow a /Volumes de forma robusta"
 
-echo "Reiniciando el servicio de Acciones de Carpeta para registrar el nuevo workflow..."
+# La ruta completa y dinámica al workflow que acabamos de copiar
+# $HOME se expandirá a la ruta del usuario actual, ej: /Users/tuNombre
+WORKFLOW_PATH="$HOME/Library/Workflows/Applications/Folder Actions/auto_mount_ntfs.workflow"
+WORKFLOW_NAME="auto_mount_ntfs.workflow" # Solo el nombre del archivo
 
-# Asegurarse de que las acciones de carpeta estén habilitadas globalmente
-defaults write com.apple.folderitems FolderActionsEnabled -bool true
+# Comprobar si el workflow existe antes de intentar activarlo
+if [ ! -d "$WORKFLOW_PATH" ]; then
+    echo -e "${RED}Error: No se encontró el workflow en la ruta esperada. No se puede activar.${NC}"
+    exit 1
+fi
 
-# Reiniciar el dispatcher para que cargue la nueva acción
-killall FolderActionsDispatcher &> /dev/null || true
+echo "Registrando el workflow con el sistema..."
 
-echo -e "${GREEN}El servicio se ha reiniciado. El workflow debería estar activo.${NC}"
+# Ejecutamos el AppleScript, pasándole la ruta completa y el nombre como argumentos.
+# Esto es más limpio que insertar variables de Bash directamente en el AppleScript.
+osascript -e '
+on run argv
+	set workflowPath to item 1 of argv
+	set workflowName to item 2 of argv
+	
+	try
+		tell application "System Events"
+			-- 1. Activar Folder Actions globalmente
+			if not (folder actions enabled) then
+				set folder actions enabled to true
+			end if
+			
+			-- 2. Asegurarse de que exista una regla para /Volumes
+			if not (exists folder action for (POSIX file "/Volumes")) then
+				make new folder action with properties {path:"/Volumes"}
+			end if
+			
+			set theFolderAction to folder action for (POSIX file "/Volumes")
+			
+			-- 3. Evitar duplicados del mismo workflow en la regla de /Volumes
+			set isAlreadyAttached to false
+			repeat with aScript in scripts of theFolderAction
+				if name of aScript is equal to workflowName then
+					set isAlreadyAttached to true
+					exit repeat
+				end if
+			end repeat
+			
+			if not isAlreadyAttached then
+				-- 4. Si no está adjunto, adjuntarlo
+				make new script at end of scripts of theFolderAction with properties {path:(POSIX file workflowPath)}
+			end if
+		end tell
+		return "OK"
+	on error errMsg number errNum
+		return "Error (" & errNum & "): " & errMsg
+	end try
+end run
+' "$WORKFLOW_PATH" "$WORKFLOW_NAME"
+
+# Capturamos el código de salida del comando anterior para verificar
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}¡Éxito! El flujo de trabajo ha sido verificado y activado para /Volumes.${NC}"
+else
+    echo -e "${RED}Falló la activación del flujo de trabajo.${NC}"
+    echo -e "${YELLOW}Esto podría deberse a un problema de permisos. Revisa que la Terminal tenga 'Acceso total al disco' y permisos de 'Automatización' en 'Privacidad y seguridad'.${NC}"
+fi
 
 # --- Finalización ---
 print_header "Instalación Completada"
