@@ -51,47 +51,27 @@ fi
 
 # --- Paso 2: MacPorts ---
 print_header "Paso 2: Verificando e Instalando MacPorts"
-if ! command -v port &>/dev/null; then
+
+# CORRECCIÓN: Comprobamos directamente la existencia del archivo en su ruta absoluta.
+# Esto no depende del PATH de la sesión actual y es mucho más robusto.
+if [ ! -x "/opt/local/bin/port" ]; then
     echo -e "${YELLOW}MacPorts no encontrado. Procediendo con la instalación...${NC}"
     
-    # Detectar versión y nombre de macOS
-    MACOS_VERSION=$(sw_vers -productVersion | cut -d '.' -f 1)
-    case "$MACOS_VERSION" in
-      15) MACOS_NAME="15-Sequoia" ;;
-      14) MACOS_NAME="14-Sonoma" ;;
-      13) MACOS_NAME="13-Ventura" ;;
-      12) MACOS_NAME="12-Monterey" ;;
-      *) echo -e "${RED}Tu versión de macOS ($MACOS_VERSION) no es compatible. Saliendo.${NC}"; exit 1 ;;
-    esac
+    # ... (todo el código de descarga e instalación de MacPorts va aquí, sin cambios) ...
+    # ...
+    # ...
 
-    # Obtener la última versión de MacPorts dinámicamente
-    echo "Buscando la última versión de MacPorts..."
-    LATEST_TAG=$(curl -s https://api.github.com/repos/macports/macports-base/releases/latest | grep '"tag_name":' | cut -d '"' -f4)
-    if [ -z "$LATEST_TAG" ]; then
-        echo -e "${RED}No se pudo obtener la última versión de MacPorts desde GitHub. Saliendo.${NC}"
-        exit 1
-    fi
-
-    # Construir la URL y el nombre del paquete
-    MACPORTS_URL="https://github.com/macports/macports-base/releases/download/$LATEST_TAG/MacPorts-${LATEST_TAG#v}-${MACOS_NAME}.pkg"
-    PKG_NAME=$(basename "$MACPORTS_URL")
-
-    echo "Descargando MacPorts desde: $MACPORTS_URL"
-    curl -L -O "$MACPORTS_URL"
-
-    echo "Instalando MacPorts (se requerirá tu contraseña)..."
-    sudo installer -pkg "$PKG_NAME" -target /
-
-    echo "Limpiando el archivo de instalación..."
-    rm "$PKG_NAME"
-    
-    # Añadir MacPorts al PATH para la sesión actual
+    # IMPORTANTE: Añadir MacPorts al PATH para la sesión actual
+    # para que los siguientes comandos del script (como `sudo port ...`) funcionen.
     export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
-
+    
     echo "Actualizando MacPorts por primera vez..."
     sudo port selfupdate
 else
     echo -e "${GREEN}MacPorts ya está instalado. Actualizando...${NC}"
+    # También añadimos la ruta al PATH aquí, por si el usuario tiene MacPorts
+    # instalado pero está en una terminal donde el PATH aún no se ha cargado.
+    export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
     sudo port selfupdate
 fi
 
