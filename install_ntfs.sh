@@ -100,7 +100,7 @@ print_header "Paso 3: Verificando e Instalando NTFS-3G"
 if ! port installed ntfs-3g | grep -q 'ntfs-3g.*@.*active'; then
     echo -e "${YELLOW}NTFS-3G no encontrado. Instalando vía MacPorts...${NC}"
     # Usamos -N (non-interactive) que es más robusto que "echo y |"
-    sudo port install ntfs-3g
+    sudo port -y install ntfs-3g
 else
     echo -e "${GREEN}NTFS-3G ya está instalado y activo. Saltando este paso.${NC}"
 fi
