@@ -101,70 +101,78 @@ else
     exit 1
 fi
 
-# --- Paso 5: Registrar y Activar el Flujo de Trabajo (Versión Definitiva) ---
-print_header "Paso 5: Adjuntando el workflow a /Volumes de forma robusta"
+# --- Paso 5: Registrar y Activar el Flujo de Trabajo (El Hack Atómico) ---
+print_header "Paso 5: Adjuntando el workflow a /Volumes con el método definitivo"
 
-# La ruta completa y dinámica al workflow que acabamos de copiar
-# $HOME se expandirá a la ruta del usuario actual, ej: /Users/tuNombre
 WORKFLOW_PATH="$HOME/Library/Workflows/Applications/Folder Actions/auto_mount_ntfs.workflow"
-WORKFLOW_NAME="auto_mount_ntfs.workflow" # Solo el nombre del archivo
+WORKFLOW_NAME="auto_mount_ntfs.workflow"
 
-# Comprobar si el workflow existe antes de intentar activarlo
 if [ ! -d "$WORKFLOW_PATH" ]; then
-    echo -e "${RED}Error: No se encontró el workflow en la ruta esperada. No se puede activar.${NC}"
+    echo -e "${RED}Error: No se encontró el workflow en la ruta esperada.${NC}"
     exit 1
 fi
 
-echo "Registrando el workflow con el sistema..."
+echo "Registrando el workflow con el sistema (puede solicitar permisos)..."
 
-# Ejecutamos el AppleScript, pasándole la ruta completa y el nombre como argumentos.
-# Esto es más limpio que insertar variables de Bash directamente en el AppleScript.
-osascript -e '
+# Aquí va el AppleScript del "Éxito Atómico", ahora dentro de nuestro script de Bash.
+RESULT=$(osascript -e '
 on run argv
 	set workflowPath to item 1 of argv
 	set workflowName to item 2 of argv
 	
 	try
 		tell application "System Events"
-			-- 1. Activar Folder Actions globalmente
-			if not (folder actions enabled) then
-				set folder actions enabled to true
+			local theFolderAction
+			
+			-- Intenta crear la acción y capturar la referencia.
+			try
+				set theFolderAction to make new folder action with properties {path:"/Volumes"}
+			on error
+				-- Si falla (porque ya existe), la buscamos por fuerza bruta.
+				set allFolderActions to every folder action
+				repeat with anAction in allFolderActions
+					if path of anAction is "/Volumes" then
+						set theFolderAction to anAction
+						exit repeat
+					end if
+				end repeat
+			end try
+			
+			-- Si por alguna razón no pudimos obtener la referencia, salimos con error.
+			if theFolderAction is missing value then
+				return "Error: No se pudo obtener la referencia a la acción de /Volumes."
 			end if
 			
-			-- 2. Asegurarse de que exista una regla para /Volumes
-			if not (exists folder action for (POSIX file "/Volumes")) then
-				make new folder action with properties {path:"/Volumes"}
-			end if
-			
-			set theFolderAction to folder action for (POSIX file "/Volumes")
-			
-			-- 3. Evitar duplicados del mismo workflow en la regla de /Volumes
+			-- Ahora que tenemos la referencia, adjuntamos el script si es necesario.
 			set isAlreadyAttached to false
-			repeat with aScript in scripts of theFolderAction
-				if name of aScript is equal to workflowName then
+			try
+				if (name of scripts of theFolderAction) contains workflowName then
 					set isAlreadyAttached to true
-					exit repeat
 				end if
-			end repeat
+			on error
+				-- Error normal si no hay scripts adjuntos.
+			end try
 			
-			if not isAlreadyAttached then
-				-- 4. Si no está adjunto, adjuntarlo
+			if isAlreadyAttached is false then
 				make new script at end of scripts of theFolderAction with properties {path:(POSIX file workflowPath)}
+				return "ÉXITO: Workflow adjuntado."
+			else
+				return "ÉXITO: El workflow ya estaba adjunto."
 			end if
 		end tell
-		return "OK"
 	on error errMsg number errNum
-		return "Error (" & errNum & "): " & errMsg
+		return "Error fatal (" & errNum & "): " & errMsg
 	end try
 end run
-' "$WORKFLOW_PATH" "$WORKFLOW_NAME"
+' "$WORKFLOW_PATH" "$WORKFLOW_NAME")
 
-# Capturamos el código de salida del comando anterior para verificar
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}¡Éxito! El flujo de trabajo ha sido verificado y activado para /Volumes.${NC}"
+# Verificamos si la operación fue exitosa basándonos en la salida
+if [[ "$RESULT" == ÉXITO* ]]; then
+    echo -e "${GREEN}¡Misión cumplida! El flujo de trabajo está activo para /Volumes.${NC}"
+    echo -e "${GREEN}(Respuesta del sistema: $RESULT)${NC}"
 else
     echo -e "${RED}Falló la activación del flujo de trabajo.${NC}"
-    echo -e "${YELLOW}Esto podría deberse a un problema de permisos. Revisa que la Terminal tenga 'Acceso total al disco' y permisos de 'Automatización' en 'Privacidad y seguridad'.${NC}"
+    echo -e "${RED}Respuesta del sistema: $RESULT${NC}"
 fi
 
 # --- Finalización ---
