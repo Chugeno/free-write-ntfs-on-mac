@@ -61,23 +61,6 @@
 					<key>COMMAND_STRING</key>
 					<string>#!/bin/bash
 
-# --- FUNCIÓN DE NOTIFICACIÓN CORREGIDA ---
-notify() {
-    # La ruta a nuestra app de confianza
-    local NOTIFIER_APP_PATH="$HOME/Library/Workflows/Applications/Folder Actions/Notificador.app"
-    
-    # Comprobamos si la app existe para no causar errores
-    if [ -d "$NOTIFIER_APP_PATH" ]; then
-        # Usamos 'open' para ejecutar la app.
-        # --args "$@" pasa el mensaje COMPLETO, incluyendo espacios.
-        # El &amp; final ejecuta la notificación en segundo plano para no detener el script.
-        open "$NOTIFIER_APP_PATH" --args "$@" &amp;&gt;/dev/null &amp;
-    else
-        # Si no encuentra la app, lo registra en los logs de la consola pero no molesta.
-        echo "Error de notificación: Notificador.app no encontrado."
-    fi
-}
-
 # Función para verificar si el disco es NTFS
 is_ntfs() {
     if diskutil info "$1" | grep -q "Windows_NTFS"; then
@@ -261,7 +244,7 @@ done</string>
 				<key>isViewVisible</key>
 				<integer>1</integer>
 				<key>location</key>
-				<string>309.000000:510.000000</string>
+				<string>301.500000:717.000000</string>
 				<key>nibPath</key>
 				<string>/System/Library/Automator/Run Shell Script.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>
