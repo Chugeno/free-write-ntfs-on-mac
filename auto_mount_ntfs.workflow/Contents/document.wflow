@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>AMApplicationBuild</key>
-	<string>526</string>
+	<string>528</string>
 	<key>AMApplicationVersion</key>
 	<string>2.10</string>
 	<key>AMDocumentVersion</key>
@@ -61,9 +61,21 @@
 					<key>COMMAND_STRING</key>
 					<string>#!/bin/bash
 
-# Función para mostrar notificaciones
+# --- FUNCIÓN DE NOTIFICACIÓN CORREGIDA ---
 notify() {
-    osascript -e "display notification \"$1\" with title \"Auto Mount NTFS\""
+    # La ruta a nuestra app de confianza
+    local NOTIFIER_APP_PATH="$HOME/Library/Workflows/Applications/Folder Actions/Notificador.app"
+    
+    # Comprobamos si la app existe para no causar errores
+    if [ -d "$NOTIFIER_APP_PATH" ]; then
+        # Usamos 'open' para ejecutar la app.
+        # --args "$@" pasa el mensaje COMPLETO, incluyendo espacios.
+        # El &amp; final ejecuta la notificación en segundo plano para no detener el script.
+        open "$NOTIFIER_APP_PATH" --args "$@" &amp;&gt;/dev/null &amp;
+    else
+        # Si no encuentra la app, lo registra en los logs de la consola pero no molesta.
+        echo "Error de notificación: Notificador.app no encontrado."
+    fi
 }
 
 # Función para verificar si el disco es NTFS
@@ -98,7 +110,7 @@ mount_ntfs() {
         echo "Montando $DISK_DEVICE en $MOUNT_POINT..."
         
         # Solicitar la contraseña del usuario
-        PASSWORD=$(osascript -e 'Tell application "System Events" to display dialog "Introduce tu contraseña para continuar:" default answer "" with hidden answer' -e 'text returned of result')
+        # PASSWORD=$(osascript -e 'Tell application "System Events" to display dialog "Introduce tu contraseña para continuar:" default answer "" with hidden answer' -e 'text returned of result')
         
         # Usar la contraseña para ejecutar el comando ntfs-3g
         echo "$PASSWORD" | sudo -S /opt/local/bin/ntfs-3g -o auto_xattr,big_writes,local,allow_other "$DISK_DEVICE" "$MOUNT_POINT"
@@ -249,7 +261,7 @@ done</string>
 				<key>isViewVisible</key>
 				<integer>1</integer>
 				<key>location</key>
-				<string>354.500000:252.000000</string>
+				<string>309.000000:510.000000</string>
 				<key>nibPath</key>
 				<string>/System/Library/Automator/Run Shell Script.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>

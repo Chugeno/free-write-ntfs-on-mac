@@ -214,6 +214,52 @@ on run argv
 end run
 ' "$WORKFLOW_PATH" "$WORKFLOW_NAME")
 
+# --- Paso 6: Activación de Permisos de Notificación ---
+print_header "Paso 6: Activando Permisos de Notificación para Scripts"
+
+# --- CAMBIO AQUÍ ---
+# Apuntamos al nuevo nombre de nuestra aplicación de permisos
+PERMISSIONS_APP="./NTFS-3G Tools.app"
+
+if [ ! -d "$PERMISSIONS_APP" ]; then
+    echo -e "${RED}Error: La app de activación '${PERMISSIONS_APP}' no se encontró.${NC}"
+    exit 1
+fi
+
+echo -e "\n${YELLOW}*** ACCIÓN REQUERIDA ***${NC}"
+echo -e "A continuación, se lanzará una aplicación de prueba para solicitar permisos."
+# --- Y CAMBIO AQUÍ ---
+# Actualizamos el mensaje para que el usuario sepa qué esperar
+echo -e "Cuando macOS te pregunte si quieres permitir que 'NTFS-3G Tools' envíe notificaciones, por favor, ${GREEN}haz clic en 'Permitir'${NC}."
+echo -e "Esta acción es necesaria para que las notificaciones de montaje funcionen."
+
+# Usamos 'open' para lanzar la aplicación. Esto dispara la solicitud de permisos.
+open "$PERMISSIONS_APP"
+
+# Pausamos para dar tiempo al usuario a que haga clic en "Permitir"
+read -p "Presiona 'Enter' aquí después de haber permitido las notificaciones..."
+
+echo -e "\n${GREEN}Permisos de notificación configurados.${NC}"
+
+# --- Paso 7: Configuración de Sudo sin Contraseña (visudo) ---
+print_header "Paso 7: Configurando sudo para un montaje sin contraseña"
+
+# Obtenemos el nombre del usuario que ejecuta el script para no hardcodearlo
+CURRENT_USER=$(whoami)
+SUDOERS_RULE="$CURRENT_USER ALL=(ALL) NOPASSWD: /opt/local/bin/ntfs-3g"
+SUDOERS_FILE="/etc/sudoers.d/ntfs-no-pass"
+
+echo "Añadiendo regla a sudoers para no pedir contraseña al montar discos NTFS..."
+
+# Creamos un archivo de configuración en /etc/sudoers.d/
+# Esta es la forma moderna y segura de modificar sudoers.
+echo "$SUDOERS_RULE" | sudo tee "$SUDOERS_FILE" > /dev/null
+
+# Nos aseguramos de que el archivo tenga los permisos correctos
+sudo chmod 0440 "$SUDOERS_FILE"
+
+echo -e "${GREEN}Configuración de sudo completada.${NC}"
+
 # Verificamos si la operación fue exitosa
 if [[ "$RESULT" == ÉXITO* ]]; then
     echo -e "${GREEN}¡Misión cumplida! El flujo de trabajo está activo para /Volumes.${NC}"
