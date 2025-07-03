@@ -214,32 +214,34 @@ on run argv
 end run
 ' "$WORKFLOW_PATH" "$WORKFLOW_NAME")
 
-# --- Paso 6: Activación de Permisos de Notificación ---
-print_header "Paso 6: Activando Permisos de Notificación para Scripts"
+# --- Paso 6: Copia de Herramientas y Activación de Permisos ---
+print_header "Paso 6: Configurando Herramientas de Soporte"
 
-# --- CAMBIO AQUÍ ---
-# Apuntamos al nuevo nombre de nuestra aplicación de permisos
-PERMISSIONS_APP="./NTFS-3G Tools.app"
+# Definimos las rutas
+NOTIFIER_APP_SOURCE="./Notificador.app"
+WORKFLOW_SOURCE="./auto_mount_ntfs.workflow"
+# --- CAMBIO CLAVE: El destino ahora es la carpeta de Acciones de Carpeta ---
+DEST_DIR="$HOME/Library/Workflows/Applications/Folder Actions"
 
-if [ ! -d "$PERMISSIONS_APP" ]; then
-    echo -e "${RED}Error: La app de activación '${PERMISSIONS_APP}' no se encontró.${NC}"
-    exit 1
-fi
+# Nos aseguramos de que el directorio de destino exista
+mkdir -p "$DEST_DIR"
 
-echo -e "\n${YELLOW}*** ACCIÓN REQUERIDA ***${NC}"
-echo -e "A continuación, se lanzará una aplicación de prueba para solicitar permisos."
-# --- Y CAMBIO AQUÍ ---
-# Actualizamos el mensaje para que el usuario sepa qué esperar
-echo -e "Cuando macOS te pregunte si quieres permitir que 'NTFS-3G Tools' envíe notificaciones, por favor, ${GREEN}haz clic en 'Permitir'${NC}."
-echo -e "Esta acción es necesaria para que las notificaciones de montaje funcionen."
+# Copiamos el Notificador y el Workflow al mismo lugar
+echo "Instalando la aplicación de notificaciones..."
+cp -R "$NOTIFIER_APP_SOURCE" "$DEST_DIR/"
+echo "Instalando el flujo de trabajo de Automator..."
+cp -R "$WORKFLOW_SOURCE" "$DEST_DIR/"
 
-# Usamos 'open' para lanzar la aplicación. Esto dispara la solicitud de permisos.
-open "$PERMISSIONS_APP"
 
-# Pausamos para dar tiempo al usuario a que haga clic en "Permitir"
-read -p "Presiona 'Enter' aquí después de haber permitido las notificaciones..."
+# --- Activación de Permisos (La parte que importa) ---
+echo -e "\n${YELLOW}*** ACCIÓN MANUAL REQUERIDA ***${NC}"
+echo -e "A continuación, se abrirá la app 'Notificador' para que le concedas permisos."
+echo -e "Cuando macOS te pregunte si quieres permitir que 'Notificador.app' envíe notificaciones, por favor, ${GREEN}haz clic en 'Permitir'${NC}."
 
-echo -e "\n${GREEN}Permisos de notificación configurados.${NC}"
+# Lanzamos la app desde su nueva ubicación para forzar la pregunta de permiso
+open "$DEST_DIR/Notificador.app"
+
+read -p "Después de permitir las notificaciones, presiona 'Enter'..."
 
 # --- Paso 7: Configuración de Sudo sin Contraseña (visudo) ---
 print_header "Paso 7: Configurando sudo para un montaje sin contraseña"
