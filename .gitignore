@@ -4,5 +4,9 @@ para_github.txt
 pruebas/
 version1/
 version2/
+version3/
 *.pkg
 pruebas.sh
+GEMINI.md
+.env
+.DS_Store
