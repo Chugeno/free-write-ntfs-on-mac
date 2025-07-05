@@ -29,7 +29,7 @@ Antes de instalar, es **crucial** que prepares tu sistema. Sigue todas las instr
 Una vez completados los pre-requisitos y reiniciado tu Mac, abre una terminal y ejecuta el siguiente comando. Puedes copiarlo y pegarlo.
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/eugenioazurmendi/NTFS-MAC-PORTS-SCRIPT/main/install_ntfs.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Chugeno/free-write-ntfs-on-mac/main/install_ntfs.sh)"
 ```
 
 El script te guiará a través de la instalación de `ntfs-3g`, `macFUSE` y `terminal-notifier` usando Homebrew, y configurará el agente de montaje automático.
@@ -43,7 +43,7 @@ Si deseas eliminar la solución de montaje automático y/o las herramientas inst
 Ejecuta el siguiente comando en tu terminal:
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/eugenioazurmendi/NTFS-MAC-PORTS-SCRIPT/main/uninstall.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Chugeno/free-write-ntfs-on-mac/main/uninstall.sh)"
 ```
 
 El desinstalador te dará dos opciones:
