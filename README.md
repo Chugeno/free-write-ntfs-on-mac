@@ -58,3 +58,21 @@ El desinstalador te dará dos opciones:
 -   **`auto_mount_ntfs.sh`**: Script que se ejecuta en segundo plano. Es activado por `launchd` cada vez que se conecta un nuevo volumen en `/Volumes`. Detecta si es una unidad NTFS, la desmonta y la vuelve a montar usando `ntfs-3g` con permisos de escritura.
 -   **`uninstall.sh`**: Script que detiene y elimina el Agente de Lanzamiento y ofrece desinstalar las dependencias.
 -   **Agente de `launchd`**: Un servicio (`com.user.automountntfs.plist`) que se ejecuta en segundo plano y vigila la carpeta `/Volumes` para lanzar `auto_mount_ntfs.sh` cuando sea necesario.
+
+---
+
+## Preguntas Frecuentes (FAQ)
+
+### ¿Puedo volver a activar la Protección de Integridad del Sistema (SIP) después de la instalación?
+
+**Sí.** De hecho, es recomendable hacerlo por seguridad. Una vez que hayas instalado todo y verificado que funciona, puedes seguir estos pasos:
+
+1.  Reinicia tu Mac en **Modo de Recuperación**.
+2.  Abre la **Terminal** desde el menú de Utilidades.
+3.  Ejecuta el comando:
+    ```bash
+    csrutil enable
+    ```
+4.  Reinicia tu Mac normalmente.
+
+> **Nota Importante:** Es posible que después de reactivar SIP, la próxima vez que conectes un disco NTFS, macOS te pida nuevamente que autorices la extensión de kernel de macFUSE en `Preferencias del Sistema > Seguridad y Privacidad`. Esto es un comportamiento esperado. Simplemente autorízala de nuevo y no volverá a molestarte.

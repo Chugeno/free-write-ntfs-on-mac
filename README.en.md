@@ -58,3 +58,21 @@ The uninstaller will give you two options:
 -   **`auto_mount_ntfs.sh`**: The script that runs in the background. It is triggered by `launchd` whenever a new volume is connected in `/Volumes`. It detects if it is an NTFS drive, unmounts it, and remounts it using `ntfs-3g` with write permissions.
 -   **`uninstall.sh`**: The script that stops and removes the Launch Agent and offers to uninstall the dependencies.
 -   **`launchd` Agent**: A service (`com.user.automountntfs.plist`) that runs in the background and watches the `/Volumes` folder to launch `auto_mount_ntfs.sh` when needed.
+
+---
+
+## Frequently Asked Questions (FAQ)
+
+### Can I re-enable System Integrity Protection (SIP) after installation?
+
+**Yes.** In fact, it is recommended for security. Once you have installed everything and verified that it works, you can follow these steps:
+
+1.  Reboot your Mac into **Recovery Mode**.
+2.  Open the **Terminal** from the Utilities menu.
+3.  Run the command:
+    ```bash
+    csrutil enable
+    ```
+4.  Restart your Mac normally.
+
+> **Important Note:** It is possible that after re-enabling SIP, the next time you connect an NTFS drive, macOS may ask you to authorize the macFUSE kernel extension again in `System Preferences > Security & Privacy`. This is expected behavior. Simply allow it again, and it won't bother you anymore.
