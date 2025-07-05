@@ -32,7 +32,7 @@ Once you have completed the prerequisites and restarted your Mac, open a termina
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Chugeno/free-write-ntfs-on-mac/main/install_ntfs.sh)"
 ```
 
-The script will guide you through the installation of `ntfs-3g`, `macFUSE`, and `terminal-notifier` using Homebrew, and will set up the automatic mounting agent.
+The script will guide you through the installation of `ntfs-3g`, `macFUSE`, and `terminal-notifier` using MacPorts, and will set up the automatic mounting agent.
 
 ---
 
@@ -54,7 +54,7 @@ The uninstaller will give you two options:
 
 ## How It Works
 
--   **`install_ntfs.sh`**: The main script that installs dependencies (`macFUSE`, `ntfs-3g`, `terminal-notifier`) via Homebrew and sets up a Launch Agent (`launchd`).
+-   **`install_ntfs.sh`**: The main script that installs dependencies (`macFUSE`, `ntfs-3g`, `terminal-notifier`) via MacPorts and sets up a Launch Agent (`launchd`).
 -   **`auto_mount_ntfs.sh`**: The script that runs in the background. It is triggered by `launchd` whenever a new volume is connected in `/Volumes`. It detects if it is an NTFS drive, unmounts it, and remounts it using `ntfs-3g` with write permissions.
 -   **`uninstall.sh`**: The script that stops and removes the Launch Agent and offers to uninstall the dependencies.
 -   **`launchd` Agent**: A service (`com.user.automountntfs.plist`) that runs in the background and watches the `/Volumes` folder to launch `auto_mount_ntfs.sh` when needed.
