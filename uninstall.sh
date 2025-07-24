@@ -20,20 +20,37 @@ print_header() {
 
 uninstall_config() {
     print_header "Paso 1: Eliminando Configuración de Montaje Automático"
-    AGENT_LABEL="com.user.automountntfs"
-    PLIST_DEST="$HOME/Library/LaunchAgents/${AGENT_LABEL}.plist"
+
+    # --- Definir ambas ubicaciones posibles para el servicio ---
+    USER_AGENT_LABEL="com.user.automountntfs"
+    USER_PLIST_DEST="$HOME/Library/LaunchAgents/${USER_AGENT_LABEL}.plist"
+    
+    SYSTEM_AGENT_LABEL="com.system.automountntfs"
+    SYSTEM_PLIST_DEST="/Library/LaunchDaemons/${SYSTEM_AGENT_LABEL}.plist"
+
     INSTALL_DIR="$HOME/.ntfs-automount"
 
-    if launchctl list | grep -q "$AGENT_LABEL"; then
-        echo "Deteniendo el servicio de montaje automático..."
-        launchctl unload "$PLIST_DEST"
+    # --- Intentar descargar y eliminar el servicio de usuario ---
+    if [ -f "$USER_PLIST_DEST" ]; then
+        if launchctl list | grep -q "$USER_AGENT_LABEL"; then
+            echo "Deteniendo el servicio de usuario..."
+            launchctl unload "$USER_PLIST_DEST"
+        fi
+        echo "Eliminando archivo de servicio de usuario (.plist)..."
+        rm -f "$USER_PLIST_DEST"
     fi
 
-    if [ -f "$PLIST_DEST" ]; then
-        echo "Eliminando archivo de servicio (.plist)..."
-        rm -f "$PLIST_DEST"
+    # --- Intentar descargar y eliminar el servicio de sistema (con sudo) ---
+    if [ -f "$SYSTEM_PLIST_DEST" ]; then
+        if sudo launchctl list | grep -q "$SYSTEM_AGENT_LABEL"; then
+            echo "Deteniendo el servicio de sistema..."
+            sudo launchctl unload "$SYSTEM_PLIST_DEST"
+        fi
+        echo "Eliminando archivo de servicio de sistema (.plist)..."
+        sudo rm -f "$SYSTEM_PLIST_DEST"
     fi
 
+    # --- Eliminar el directorio de instalación ---
     if [ -d "$INSTALL_DIR" ]; then
         echo "Eliminando directorio de instalación ($INSTALL_DIR)..."
         rm -rf "$INSTALL_DIR"

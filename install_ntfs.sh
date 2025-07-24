@@ -234,14 +234,16 @@ EOF
 # Asegurarse de que el nuevo script sea ejecutable
 chmod +x "$SCRIPT_DEST"
 
-# --- Paso 5: Creación y Activación del Agente de Sistema (launchd) ---
+# --- Paso 5: Creación y Activación del Demonio de Sistema (launchd) ---
 print_header "Paso 5: Activando el servicio de montaje automático"
 
-AGENT_LABEL="com.user.automountntfs"
-PLIST_DEST="$HOME/Library/LaunchAgents/${AGENT_LABEL}.plist"
+# Usaremos un LaunchDaemon para que se ejecute como root y para todo el sistema
+AGENT_LABEL="com.system.automountntfs"
+PLIST_DEST="/Library/LaunchDaemons/${AGENT_LABEL}.plist"
 
-echo "Creando el archivo de configuración del servicio..."
+echo "Creando el archivo de configuración del servicio en $PLIST_DEST..."
 
+# El script de montaje se ejecuta desde SCRIPT_DEST
 PLIST_CONTENT="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
 <plist version=\"1.0\">
@@ -259,19 +261,23 @@ PLIST_CONTENT="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 </dict>
 </plist>"
 
-mkdir -p "$HOME/Library/LaunchAgents"
-echo "$PLIST_CONTENT" > "$PLIST_DEST"
+# Crear el archivo plist. Se necesita sudo para escribir en /Library/LaunchDaemons
+echo "$PLIST_CONTENT" | sudo tee "$PLIST_DEST" > /dev/null
+sudo chown root:wheel "$PLIST_DEST"
+sudo chmod 644 "$PLIST_DEST"
 
 echo "Activando servicio..."
 # Descargar primero si ya existe, para asegurar una recarga limpia
-if launchctl list | grep -q "$AGENT_LABEL"; then
+# Usamos 'sudo launchctl' porque es un LaunchDaemon
+if sudo launchctl list | grep -q "$AGENT_LABEL"; then
     echo "El servicio ya existía. Recargando..."
-    launchctl unload "$PLIST_DEST"
+    sudo launchctl unload "$PLIST_DEST"
     sleep 1
 fi
-launchctl load "$PLIST_DEST"
+sudo launchctl load "$PLIST_DEST"
 
-if launchctl list | grep -q "$AGENT_LABEL"; then
+# Verificar que el servicio (daemon) esté cargado
+if sudo launchctl list | grep -q "$AGENT_LABEL"; then
     echo -e "${GREEN}El servicio de montaje automático se activó correctamente.${NC}"
 else
     echo -e "${RED}Error: No se pudo activar el servicio de montaje automático.${NC}"
