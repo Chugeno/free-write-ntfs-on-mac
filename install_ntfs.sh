@@ -259,6 +259,7 @@ PLIST_CONTENT="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 </dict>
 </plist>"
 
+mkdir -p "$HOME/Library/LaunchAgents"
 echo "$PLIST_CONTENT" > "$PLIST_DEST"
 
 echo "Activando servicio..."
