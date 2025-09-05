@@ -243,6 +243,7 @@ AGENT_LABEL="com.user.automountntfs"
 PLIST_DEST="$HOME/Library/LaunchAgents/${AGENT_LABEL}.plist"
 
 echo "Creando el archivo de configuración del servicio en: $PLIST_DEST"
+mkdir -p "$HOME/Library/LaunchAgents"
 
 # Crear el archivo plist directamente usando un here-document.
 # Esto evita la asignación de variables multilínea que estaba causando errores.
