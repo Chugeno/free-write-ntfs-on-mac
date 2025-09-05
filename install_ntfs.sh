@@ -244,9 +244,9 @@ PLIST_DEST="$HOME/Library/LaunchAgents/${AGENT_LABEL}.plist"
 
 echo "Creando el archivo de configuración del servicio en: $PLIST_DEST"
 
-# Crear el contenido del plist usando un here-document.
-# Este método es más robusto y legible para contenido multilínea.
-PLIST_CONTENT=$(cat <<EOF
+# Crear el archivo plist directamente usando un here-document.
+# Esto evita la asignación de variables multilínea que estaba causando errores.
+cat > "$PLIST_DEST" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -264,10 +264,6 @@ PLIST_CONTENT=$(cat <<EOF
 </dict>
 </plist>
 EOF
-)
-
-# Crear el archivo plist. No se necesita sudo para escribir en la carpeta del usuario.
-echo "$PLIST_CONTENT" > "$PLIST_DEST"
 
 echo "Activando servicio..."
 # Descargar primero si ya existe, para asegurar una recarga limpia.
