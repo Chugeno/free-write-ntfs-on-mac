@@ -4,14 +4,15 @@
 set -e
 
 # --- Colores para la Salida ---
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-NC='\033[0m'
+RED='[0;31m'
+GREEN='[0;32m'
+YELLOW='[0;33m'
+NC='[0m'
 
 # --- Funciones de Ayuda ---
 print_header() {
-    echo -e "\n${GREEN}====================================================${NC}"
+    echo -e "
+${GREEN}====================================================${NC}"
     echo -e "${GREEN} $1 ${NC}"
     echo -e "${GREEN}====================================================${NC}"
 }
@@ -37,7 +38,8 @@ print_header "Paso 1: Verificando Xcode Command Line Tools"
 if ! xcode-select -p &>/dev/null; then
     echo -e "${YELLOW}Xcode Tools no encontradas. Iniciando instalación...${NC}"
     xcode-select --install
-    echo -e "\n${YELLOW}*** ACCIÓN REQUERIDA ***${NC}"
+    echo -e "
+${YELLOW}*** ACCIÓN REQUERIDA ***${NC}"
     echo -e "Completa la instalación de Xcode y luego presiona 'Enter' para continuar."
     read -p ""
 else
@@ -69,7 +71,8 @@ if [ ! -x "/opt/local/bin/port" ]; then
     if [ ! -s "$PKG_FILENAME" ]; then
         echo -e "${RED}La descarga de MacPorts falló.${NC}"; exit 1
     fi
-    echo -e "\n${YELLOW}*** ACCIÓN REQUERIDA ***${NC}"
+    echo -e "
+${YELLOW}*** ACCIÓN REQUERIDA ***${NC}"
     echo -e "Se abrirá el instalador de MacPorts. Complétalo y presiona 'Enter' para continuar."
     open "$PKG_FILENAME"
     read -p ""
@@ -115,20 +118,6 @@ mkdir -p "$INSTALL_DIR"
 echo "Creando script de montaje en: $SCRIPT_DEST"
 
 # Usar un "here document" para crear el script de montaje
-# Esto evita la necesidad de tener un archivo separado
-# --- Paso 4: Creación del Script de Montaje Automático ---
-print_header "Paso 4: Configurando el script de montaje automático"
-
-INSTALL_DIR="$HOME/.ntfs-automount"
-SCRIPT_DEST="$INSTALL_DIR/auto_mount_ntfs.sh"
-
-echo "Creando directorio de instalación en: $INSTALL_DIR"
-mkdir -p "$INSTALL_DIR"
-
-echo "Creando script de montaje en: $SCRIPT_DEST"
-
-# Usar un "here document" para crear el script de montaje
-# Esto evita la necesidad de tener un archivo separado
 cat > "$SCRIPT_DEST" << 'EOF'
 #!/bin/bash
 
@@ -255,9 +244,9 @@ PLIST_DEST="$HOME/Library/LaunchAgents/${AGENT_LABEL}.plist"
 
 echo "Creando el archivo de configuración del servicio en: $PLIST_DEST"
 
-# El script de montaje se ejecuta desde SCRIPT_DEST
-PLIST_CONTENT=$(cat <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
+# Crear el contenido del plist en una variable.
+# Esto evita errores de sintaxis con 'heredoc' y permite una lectura más clara.
+PLIST_CONTENT="<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -272,9 +261,7 @@ PLIST_CONTENT=$(cat <<EOF
         <string>/Volumes</string>
     </array>
 </dict>
-</plist>
-EOF
-)
+</plist>"
 
 # Crear el archivo plist. No se necesita sudo para escribir en la carpeta del usuario.
 echo "$PLIST_CONTENT" > "$PLIST_DEST"
@@ -297,68 +284,16 @@ else
     exit 1
 fi
 
-# Asegurarse de que el nuevo script sea ejecutable
-chmod +x "$SCRIPT_DEST"
-
-# --- Paso 5: Creación y Activación del Demonio de Sistema (launchd) ---
-print_header "Paso 5: Activando el servicio de montaje automático"
-
-# Usaremos un LaunchDaemon para que se ejecute como root y para todo el sistema
-AGENT_LABEL="com.system.automountntfs"
-PLIST_DEST="/Library/LaunchDaemons/${AGENT_LABEL}.plist"
-
-echo "Creando el archivo de configuración del servicio en $PLIST_DEST..."
-
-# El script de montaje se ejecuta desde SCRIPT_DEST
-PLIST_CONTENT="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
-<dict>
-    <key>Label</key>
-    <string>${AGENT_LABEL}</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>${SCRIPT_DEST}</string>
-    </array>
-    <key>WatchPaths</key>
-    <array>
-        <string>/Volumes</string>
-    </array>
-</dict>
-</plist>"
-
-# Crear el archivo plist. Se necesita sudo para escribir en /Library/LaunchDaemons
-echo "$PLIST_CONTENT" | sudo tee "$PLIST_DEST" > /dev/null
-sudo chown root:wheel "$PLIST_DEST"
-sudo chmod 644 "$PLIST_DEST"
-
-echo "Activando servicio..."
-# Descargar primero si ya existe, para asegurar una recarga limpia
-# Usamos 'sudo launchctl' porque es un LaunchDaemon
-if sudo launchctl list | grep -q "$AGENT_LABEL"; then
-    echo "El servicio ya existía. Recargando..."
-    sudo launchctl unload "$PLIST_DEST"
-    sleep 1
-fi
-sudo launchctl load "$PLIST_DEST"
-
-# Verificar que el servicio (daemon) esté cargado
-if sudo launchctl list | grep -q "$AGENT_LABEL"; then
-    echo -e "${GREEN}El servicio de montaje automático se activó correctamente.${NC}"
-else
-    echo -e "${RED}Error: No se pudo activar el servicio de montaje automático.${NC}"
-    exit 1
-fi
-
-
-
 # --- Paso 6: Configuración de Sudo sin Contraseña ---
 print_header "Paso 6: Configurando sudo para montaje sin contraseña"
 CURRENT_USER=$(whoami)
-SUDOERS_RULE="$CURRENT_USER ALL=(ALL) NOPASSWD: /opt/local/bin/ntfs-3g"
-SUDOERS_FILE="/etc/sudoers.d/ntfs-no-pass"
-echo "Añadiendo regla a sudoers..."
-echo "$SUDOERS_RULE" | sudo tee "$SUDOERS_FILE" > /dev/null
+SUDOERS_NTFS3G_RULE="$CURRENT_USER ALL=(ALL) NOPASSWD: /opt/local/bin/ntfs-3g"
+SUDOERS_MKDIR_RULE="$CURRENT_USER ALL=(ALL) NOPASSWD: /bin/mkdir -p /Volumes/*"
+SUDOERS_FILE="/etc/sudoers.d/ntfs-automount-rules"
+
+echo "Añadiendo reglas a sudoers para ntfs-3g y mkdir..."
+# Usamos un solo archivo para ambas reglas para mantenerlo organizado.
+(echo "$SUDOERS_NTFS3G_RULE"; echo "$SUDOERS_MKDIR_RULE") | sudo tee "$SUDOERS_FILE" > /dev/null
 sudo chmod 0440 "$SUDOERS_FILE"
 echo -e "${GREEN}Configuración de sudo completada.${NC}"
 
